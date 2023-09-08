@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rock Paper Scissors</title>
+    <style>
+      body{
+        background-color: rgb(25,25,25);
+        color:white;
+        font-family:Arial;
+      }
+      .title{
+        font-size: 40px;
+        font-weight: bold;
+      }
+      .button_images{
+        height:100px;
+      }
+      .button-script{
+        background-color: transparent;
+        border: 3px solid white;
+        width:120px;
+        height:120px;
+        border-radius: 60px;
+        margin-right:20px;
+        cursor: pointer;
+      }
+      .result-script{
+        font-size: 30px;
+        font-weight: bold;
+        margin-top: 50px;
+      }
+      .score-script{
+        margin-top:60px;
+        font-size: 30px;
+      }
+      .reset-style{
+        background-color: white;
+        border:none;
+        font-size: 20px;
+        padding: 10px 7px 10px 7px;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="title">Rock Paper Scissors</p>
+    <button onclick="
+      play('rock');
+    " class="button-script"><img src="images/rock-emoji.png " class="button_images"></button>
+
+    <button onclick="
+      play('paper');
+    " class="button-script"><img src="images/paper-emoji.png" class="button_images"></button>
+
+    <button onclick="
+      play('scissors');
+    " class="button-script"><img src="images/scissors-emoji.png" class="button_images"></button>
+
+    <p class="result result-script"></p>
+    <p class="moves"></p>
+    <p class="score-board score-script"></p>
+
+    <button class="reset-script reset-style">Reset</button>
+
+    <button class="autoplay-script reset-style">Auto Play</button>
+
+    <div class="confirmMessage"></div>
+
+
+
+
+    <script>
+      const score = JSON.parse(localStorage.getItem('score'))||{
+        wins:0,
+        losses:0,
+        tie:0
+      };
+
+      updateScoreElement();
+
+      let result;
+
+      function computerPlay(){
+        let move = Math.random();
+        if(move<1/3){
+          return 'rock';
+        }
+        else if(move>=1/3 && move<2/3){
+          return 'paper';
+        }
+        else{
+          return 'scissors';
+        }
+      }
+
+      function play(guess){
+        let computerMove = computerPlay();
+        if(guess===computerMove){
+          score.tie += 1;
+          result = 'TIE';
+        }
+        else{
+          if(guess==='paper'){
+            if(computerMove==='scissors'){
+              score.losses++;
+              result = 'YOU LOOSE';
+            }
+            else{
+              score.wins++;
+              result = 'YOU WINS';
+            }
+          }
+          else if(guess==='rock'){
+            if(computerMove==='scissors'){
+              score.wins++;
+              result = 'YOU WINS';
+            }
+            else{
+              score.losses++;
+              result = 'YOU LOOSE';
+            }
+          }
+          else if(guess==='scissors'){
+            if(computerMove==='paper'){
+              score.wins++;
+              result = 'YOU WINS';
+            }
+            else{
+              score.losses++;
+              result = 'YOU LOOSE';
+            }
+          }
+        }
+
+        document.querySelector('.result').innerHTML = result;
+        document.querySelector('.moves').innerHTML = `YOU <img src="images/${guess}-emoji.png" class="button_images"> <img src="images/${computerMove}-emoji.png" class="button_images"> COMPUTER`;
+        updateScoreElement();
+      }
+
+      function updateScoreElement(){
+        localStorage.setItem('score',JSON.stringify(score));
+        document.querySelector(`.score-board`).innerHTML=`wins: ${score.wins} losses: ${score.losses} tie: ${score.tie}`.toUpperCase();
+      }
+
+
+      document.querySelector(`.reset-script`).addEventListener('click',()=>{
+        const alerstMessage=document.querySelector(`.confirmMessage`);
+          alerstMessage.innerHTML=(`Are you sure you want to reset score? <button class="yesConfirmed"> YES </button> <button class="noConfirmed"> NO </button>`);
+          document.querySelector(`.yesConfirmed`).addEventListener('click',()=>{
+            resetScore();
+            alerstMessage.innerHTML='';
+          });
+          document.querySelector(`.noConfirmed`).addEventListener('click',()=>{
+            alerstMessage.innerHTML='';
+          });
+      });
+
+      function resetScore(){
+        score.wins = 0;
+        score.losses = 0;
+        score.tie = 0;
+        localStorage.removeItem('score');
+        document.querySelector(`.result`).innerHTML='';
+        document.querySelector(`.moves`).innerHTML='';
+        updateScoreElement();
+      }
+
+      let intervalId;
+      let autoplayOn=false;
+
+      function autoPlay(){
+        if(!autoplayOn){
+          interwalId = setInterval(()=>{
+            const playerMove = computerPlay();
+            play(playerMove);
+          },2000);
+          autoplayOn=true;
+          document.querySelector(`.autoplay-script`).innerHTML='Stop Playing';
+        }
+        else{
+          clearInterval(interwalId);
+          autoplayOn=false;
+          document.querySelector(`.autoplay-script`).innerHTML='Auto Play';
+        }
+      }
+
+      document.querySelector(`.autoplay-script`).addEventListener('click',()=>{
+        autoPlay();
+      });
+
+      document.body.addEventListener('keydown', (event)=>{
+        if(event.key==='a'){
+          autoPlay();
+        }
+        else if(event.key==='s'){
+          play('scissors');
+        }
+        else if(event.key==='r'){
+          play('rock');
+        }
+        else if(event.key==='p'){
+          play('paper');
+        }
+        else if(event.key==='Backspace'){
+          const alerstMessage=document.querySelector(`.confirmMessage`);
+          alerstMessage.innerHTML=(`Are you sure you want to reset score? <button class="yesConfirmed"> YES </button> <button class="noConfirmed"> NO </button>`);
+          document.querySelector(`.yesConfirmed`).addEventListener('click',()=>{
+            resetScore();
+            alerstMessage.innerHTML='';
+          });
+          document.querySelector(`.noConfirmed`).addEventListener('click',()=>{
+            alerstMessage.innerHTML='';
+          });
+        }
+      });
+
+    </script>
+  </body>
+</html>

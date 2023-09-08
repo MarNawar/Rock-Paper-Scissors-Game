@@ -1,0 +1,1 @@
+A Game with AutoPlay functionality and Reset Button.
